@@ -54,11 +54,41 @@
 	\caption{注意力机制}
 	\label{FIGhtmltext}
 \end{figure}
-如上图所示, $\boldsymbol{P}=\left[p_{1}, p_{2}, \cdots, p_{M}\right] \in \mathbf{R}^{D \times M}$表示输入的M个特征, 注意力机制的本质是对特征进行加权, 突出重要的特征, 因此首先要计算不同特征的权重, 即注意力得分, 通常的计算公式如下
+
+如上图所示, $P=\left[p_{1}, p_{2}, \cdots, p_{M}\right] \in \mathbf{R}^{D \times M}$表示输入的M个特征, 注意力机制的本质是对特征进行加权, 突出重要的特征, 因此首先要计算不同特征的权重, 即注意力得分, 通常的计算公式如下
 \begin{equation}
 	\alpha_{i}=\operatorname{softmax}\left(f\left(p_{i}, q\right)\right)=\frac{\exp \left(f\left(p_{i}, q\right)\right)}{\sum_{m=1}^{M} \exp \left(f\left(p_{m}, q\right)\right)}
 \end{equation}
 这里$q$是与任务本身相关的向量, 例如在电商推荐场景下, $q$就是待推荐商品, 而$p_i$是用户的历史购买物品列表. $f(\cdot)$是打分函数下面列举了一些打分函数. 但是, 打分函数不仅限于此, 它甚至可以是一个小的神经网络(DIN), 因为神经网络的本质是对目标函数的拟合, 当无法确定打分函数应该如何设置时, 可以将打分函数设置成一个小的共享的神经网络, 由数据决定打分函数究竟具有怎样的形式.
+\begin{enumerate}
+	\item 点积模型(effective approaches to attention-based neural machine translation)
+	\begin{equation}
+	f(p, q)=p^{T} q
+	\end{equation}
+	\item 双线性模型
+	\begin{equation}
+		f(p, q)=p^{T}W q
+	\end{equation}
+	\item 加法模型(Neural machine translation by jointly learning to align and translate)
+	\begin{equation}
+		f(p, q)=W_{3}^{T} \tanh \left(W_{p} p+W_{q} q\right)
+	\end{equation}
+\end{enumerate}
+上述的所有$W$都是待学习的参数.
+\subsection{自注意力机制(transformer)}
+
+\subsection{损失函数与评价指标}
+训练神经网络, 本质上是一个优化问题, 损失函数即神经网络中需要优化的目标函数. 对于推荐系统中常见的点击率预估任务, 可以将其视为二分类任务(点击或者不点击), 一般采用交叉熵损失函数, 其定义如下
+\begin{equation}
+	L(x,y)=-y \log (f(x))-(1-y) \log (1-f(x))
+\end{equation}
+其中, $y \in \{ 0,1\}$是真实标签, 0代表该物品未被用户点击, 1代表用户点击了该样本. $f(x)$ 代表了神经网络输出的结果. 交叉熵的定义来自于信息论, 可以用来刻画两个分布的差异. 此外, 交叉熵损失函数还可以由极大似然估计估计得到, 估计中的真实分布由经验分布代替.
+在推荐系统领域, 数据往往都是稀疏的, 且正负样本比例十分不均衡, 大部分被曝光的物品都没有被点击. 这意味着即使算法将所有的样本都预测成负样本依然可以得到很高的准确率. 为了解决这一问题, 常用的评价指标为AUC, 即ROC曲线下的面积. 其具体含义为: 分别从正负样本集中随机抽取一个正样本和一个负样本, 模型对正样本的打分大于对负样本打分的概率.
+\begin{equation}
+	\mathrm{AUC}=\frac{1}{\left|\mathcal{D}^{-}\right|\left|\mathcal{D}^{+}\right|} \sum_{j \in D^{-}} \sum_{k \in \mathcal{D}^{+}} \mathbf{I}\left(\hat{y}^{j}<\hat{y}^{k}\right)
+\end{equation}
+这里$I$是示性函数, 
+
 
 
 
