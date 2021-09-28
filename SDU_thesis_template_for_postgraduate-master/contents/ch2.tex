@@ -1,0 +1,85 @@
+% !Mode:: "TeX:UTF-8"
+\chapter{相关理论和概念}
+\echapter{Related theory and concepts}
+\section{推荐算法中常用的深度学习技术}
+\subsection{前馈神经网络}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{MLP.png}
+	\caption{全连接神经网络}
+	\label{FIGhtmltext}
+\end{figure}
+图2.1展示了一个全连接的神经网络, 包含输入层, 隐藏层和输出层, 若第$i-1$层的输出是$x^{i-1} \in R^{d_{i-1}} $, 则第$i$层的输出为$x^{i} \in R^{d_{i}} $, 计算方式如下
+\begin{equation}
+		x^{(i)}=f_{i}\left(W^{(i)} x^{(i-1)}+\b^{(i)}\right)
+\end{equation}
+这里$W^{(i)} \in \mathbf{R}^{d_{i} \times d_{i-1}}$是第$i-1$层到第$i$层的参数矩阵, $b^{(i)} \in R^{d_i}$.$f(\cdot)$是第$i$层的激活函数, 激活函数为非线性函数, 否则增加网络的层数就失去意义了. 神经网络的数学本质是用含有大量参数的一个非线性函数去逼近真实解的函数. 理论上, 网络层数越多, 参数量越大, 神经网络可以拟合的函数集合就越大, 但是实际上, 由于现实条件的限制, 网络并不是越复杂越好, 如果数据量不足, 训练得到的网络可能会产生过拟合的问题, 且更深更复杂的网络往往需要更多的存储空间和更长的训练耗时. 在实践中, 较为常用的激活函数有Sigmoid函数, Tanh函数, ReLU函数等, 下面给出它们的定义
+\begin{enumerate}
+	\item Sigmoid函数:
+	\begin{equation}
+		\sigma(x)=\frac{1}{1+e^{-x}}
+	\end{equation}
+	\item Tanh函数
+	\begin{equation}
+		\tanh (x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}
+	\end{equation}
+	\item ReLU函数:
+	\begin{equation}
+		\operatorname{ReLU}(x)=\max (0, x)
+	\end{equation}
+\end{enumerate}
+\subsection{循环神经网络(RNN)与门控循环单元(GRU)}
+循环神经网络起源于自然语言处理领域, 它的主要作用是处理序列数据, 在推荐系统领域主要用于用户历史行为序列的建模, 下图介绍的是一个简单的循环神经网络
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{RNN.png}
+	\caption{循环神经网络}
+	\label{FIGhtmltext}
+\end{figure}
+其中$x_t \in R^{M}$表示t时刻的输入, $W \in R^{D\times M}$是参数矩阵, $b \in R^D$是偏置项, $f(\cdot)$为激活函数, 循环神经网络的特点是参数共享, 即序列中的所有$x_t$共享同样的参数和激活函数, 这大大减少了内存的损耗, 而且由于序列元素存在顺序性, 在循环神经网络中, 隐层状态变量$h_t \in R^D$由当前层的输入$x_t$和上一层的$h_{t-1}$共同决定. 然而循环神经网络在输入序列足够长的情况下也存在梯度消失和梯度爆炸的问题, 此外传统的循环神经网络很难把早期的信息传递到后面的时间节点, 这可能导致重要信心的遗漏. 针对这些问题, 主要的改进为长短期记忆神经网络(LSTM)和门控循环单元(GRU), 这里以简单但有效的GRU为例, 介绍其原理
+\begin{equation}
+	\begin{gathered}
+		z_{t}=\sigma\left(W_{z} x_{t}+U_{z} h_{t-1}+b_{z}\right) \hfill \\
+		r_{t}=\sigma\left(W_{r} x_{t}+U_{r} h_{t-1}+b_{r}\right) \hfill \\
+		\tilde{h}_{t}=\tanh \left(W_{h} x_{t}+U_{h}\left(r_{t} \odot h_{t-1}\right)+b_{h}\right) \hfill \\
+		h_{t}=z_{t} \odot h_{t-1}+\left(1-z_{t}\right) \odot \tilde{h}_{t}\hfill \\
+	\end{gathered}
+\end{equation}
+上述公式中的$z_t$和$r_t$分别被称为更新门和重置门, $r_{t-1}$控制上一个时间$t-1$还有多少信息参与$h_t$的计算, 最终的$h_t$为加权的结果, 其权重由$z_t$来控制.
+\subsection{注意力机制(Attention 机制)}
+注意力机制的本质就是加权的思想. 正如当我们用眼睛去感知世界时, 我们的大脑, 总会强调我们重点关心的部分, 而在一定程度上弱化对背景信息的接受. 因此, 注意力机制最早被应用在计算机视觉领域(Recurrent Models of Visual Attention), 随后在机器翻译任务上大放异彩(Neural Machine Translation by Jointly Learning to Align and Translate). 此外, DIN模型将注意力机制应用到序列化推荐领域, 并且在业界产生了, 广泛的影响. 国内的众多互联网公司都将该算法应用到自己的推荐系统当中去. 
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{attention.png}
+	\caption{注意力机制}
+	\label{FIGhtmltext}
+\end{figure}
+如上图所示, $\boldsymbol{P}=\left[p_{1}, p_{2}, \cdots, p_{M}\right] \in \mathbf{R}^{D \times M}$表示输入的M个特征, 注意力机制的本质是对特征进行加权, 突出重要的特征, 因此首先要计算不同特征的权重, 即注意力得分, 通常的计算公式如下
+\begin{equation}
+	\alpha_{i}=\operatorname{softmax}\left(f\left(p_{i}, q\right)\right)=\frac{\exp \left(f\left(p_{i}, q\right)\right)}{\sum_{m=1}^{M} \exp \left(f\left(p_{m}, q\right)\right)}
+\end{equation}
+这里$q$是与任务本身相关的向量, 例如在电商推荐场景下, $q$就是待推荐商品, 而$p_i$是用户的历史购买物品列表. $f(\cdot)$是打分函数下面列举了一些打分函数. 但是, 打分函数不仅限于此, 它甚至可以是一个小的神经网络(DIN), 因为神经网络的本质是对目标函数的拟合, 当无法确定打分函数应该如何设置时, 可以将打分函数设置成一个小的共享的神经网络, 由数据决定打分函数究竟具有怎样的形式.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
